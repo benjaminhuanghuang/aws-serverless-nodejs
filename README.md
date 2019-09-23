@@ -7,7 +7,7 @@
 ## Key Points
 - Node.js + serverless
 - CloudFormation
-
+- Kinesis
 
 ## Use casess
 - User orders a cake -> Send email cake maker
