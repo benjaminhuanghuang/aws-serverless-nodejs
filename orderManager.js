@@ -1,6 +1,12 @@
 'use strict'
 
 const uuidv1 = require('uuid/v1');
+const AWS = require('aws-sdk');
+const dynamo = new AWS.DynamoDB.DocumentClient();
+const kinesis = new AWS.Kinesis();
+
+const TABLE_NAME = process.env.orderTableName;
+const STREAM_NAME = process.env.orderStreamName
 
 module.export.createOrder = body => {
     const order = {
@@ -18,5 +24,27 @@ module.export.createOrder = body => {
 
 module.export.placeNewOrder = order => {
     // save order in table
-    // put order stream
+    return saveNewOrder(order).then(() => {
+        // put order stream
+        return placeOrderStream(order)
+    })
+}
+
+function saveNewOrder(order) {
+    const params = {
+        TableName: TABLE_NAME,
+        Item: order
+    }
+
+    return dynamo.put(params).promise()
+}
+
+function placeOrderStream(order) {
+    const params = {
+        Data: JSON.stringify(order),
+        PartitionKey: order.orderId,
+        StreamName: STREAM_NAME
+    }
+
+    return kinesis.putRecord(params).promise();
 }
