@@ -1,0 +1,15 @@
+service: cake-ordering-backend
+provider:
+  name: aws
+  runtime: nodejs10.x
+
+functions:
+  # hello:
+  #   handler: handler.hello
+  createOrder:
+    handler: handler.createOrder
+    events:
+      - http:
+          path: /order
+          method: post
+    
