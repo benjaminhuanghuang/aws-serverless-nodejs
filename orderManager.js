@@ -8,7 +8,7 @@ const kinesis = new AWS.Kinesis();
 const TABLE_NAME = process.env.orderTableName;
 const STREAM_NAME = process.env.orderStreamName
 
-module.export.createOrder = body => {
+module.exports.createOrder = body => {
     const order = {
         orderId: uuidv1(),
         name: body.name,
@@ -22,12 +22,21 @@ module.export.createOrder = body => {
     return order;
 }
 
-module.export.placeNewOrder = order => {
+module.exports.placeNewOrder = order => {
     // save order in table
     return saveNewOrder(order).then(() => {
         // put order stream
         return placeOrderStream(order)
     })
+}
+
+module.exports.fulfillOrder = (orderId, fulfillmentId) => {
+    return getOrder(orderId).then(savedOrder => {
+        const order = createFulfilledOrder(savedOrder, fulfillmentId);
+        return saveOrder(order).then(() => {
+           return placeOrderStream(order) 
+        });
+    });
 }
 
 function saveNewOrder(order) {
@@ -47,4 +56,25 @@ function placeOrderStream(order) {
     }
 
     return kinesis.putRecord(params).promise();
+}
+
+function getOrder(orderId) {
+    const params = {
+        Key: {
+            orderId: orderId
+        },
+        TableName: TABLE_NAME
+    };
+
+    return dynamo.get(params).promise().then(result => {
+        return result.Item;
+    })
+}
+
+function createFulfilledOrder(savedOrder, fulfillmentId) {
+    savedOrder.fulfillmentId = fulfillmentId;
+    savedOrder.fulfillmentDate = Date.now();
+    savedOrder.eventType = 'order_fulfilled';
+
+    return savedOrder;
 }

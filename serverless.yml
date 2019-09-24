@@ -1,8 +1,23 @@
 service: cake-ordering-system 
 
+plugins:
+  - serverless-pseudo-parameters
+
 provider:
   name: aws
   runtime: nodejs8.10
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:GetItem
+      Resource:
+        - arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:table/ordersTable
+    - Effect: Allow
+      Action:
+        - kinesis:PutRecord
+      Resource:
+        - arn:aws:kinesis:#{AWS::Region}:#{AWS::AccountId}:stream/order-events
 
 functions:
   createOrder:
@@ -10,6 +25,15 @@ functions:
     events:
       - http:
           path: /order
+          method: post
+    environment:
+      orderTableName: ordersTable
+      orderStreamName: order-events
+  orderFulfillment:
+    handler: handler.orderFulfillment
+    events:
+      - http:
+          path: /order/fulfill
           method: post
     environment:
       orderTableName: ordersTable

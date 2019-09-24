@@ -1,6 +1,7 @@
-Install nodejs serverless framework
+Install nodejs serverless framework and plug-ins
 ```
   npm install serverless -g
+  npm install serverless-pseudo-parameters -S
 ```
 ## create serverless project (yml file and handler.js)
 ```
@@ -9,6 +10,8 @@ Install nodejs serverless framework
 serverless.yml
 ```
 service: cake-ordering-backend
+plugins:
+  - serverless-pseudo-parameters
 provider:
   name: aws
   runtime: nodejs10.x
