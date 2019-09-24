@@ -24,7 +24,7 @@ module.exports.createOrder = body => {
 
 module.exports.placeNewOrder = order => {
     // save order in table
-    return saveNewOrder(order).then(() => {
+    return saveOrder(order).then(() => {
         // put order stream
         return placeOrderStream(order)
     })
@@ -39,7 +39,7 @@ module.exports.fulfillOrder = (orderId, fulfillmentId) => {
     });
 }
 
-function saveNewOrder(order) {
+function saveOrder(order) {
     const params = {
         TableName: TABLE_NAME,
         Item: order
