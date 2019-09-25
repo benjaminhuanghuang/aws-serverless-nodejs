@@ -34,3 +34,9 @@ or
   sls deploy
 ```
 POST - https://vxg27gag98.execute-api.us-east-1.amazonaws.com/dev/order
+
+
+## Clean up
+```
+  sls remove
+```
